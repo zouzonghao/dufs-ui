@@ -107,13 +107,8 @@
                 ></v-btn>
             </template>
         </v-tooltip>
-        <!--
-            原版的新建文件能不能加上 · Issue #34 · TransparentLC/dufs-material-assets
-            https://github.com/TransparentLC/dufs-material-assets/issues/34
-            TODO: Issue 提出者 star 后或 star 总数达到 128 后实装
-        -->
         <v-tooltip
-            v-if="filelist.allow_upload && false"
+            v-if="filelist.allow_upload"
             :text="t('titleCreateFile')"
         >
             <template v-slot:activator="{ props }">
@@ -471,14 +466,14 @@
                                 </template>
                             </v-tooltip>
                             <v-tooltip
-                                v-if="((p.is_dir && filelist.allow_archive) || !p.is_dir) && filelist.user"
-                                :text="t('actionCopyLinkWithToken')"
+                                v-if="((p.is_dir && filelist.allow_archive) || !p.is_dir) && canShareWithToken"
+                                :text="t('actionShare')"
                             >
                                 <template v-slot:activator="{ props }">
                                     <v-btn
                                         v-bind="props"
                                         variant="plain"
-                                        icon="$mdiLinkBoxVariant"
+                                        icon="$mdiShareVariant"
                                         density="comfortable"
                                         @click="copyLinkWithToken(p)"
                                     ></v-btn>
@@ -1020,6 +1015,7 @@ const sortOrderDesc = ref(false);
 const filelist = shallowRef({
     paths: [],
 });
+const canShareWithToken = computed(() => Boolean(filelist.value.auth && filelist.value.user));
 
 const filelistPathsSorted = computed(() => {
     switch (sortColumn.value) {
@@ -1279,20 +1275,46 @@ const moveFile = async e => {
 /**
  * @param {PathItem} e
  */
-const copyLinkWithToken = async e => {
-    const token = await dufsfetch(`${e.fullpath}?${e.is_dir ? 'zip&' : ''}tokengen`).then(r => r.text());
-    const link = `${location.protocol}//${location.host}${e.fullpath}?${e.is_dir ? 'zip&' : ''}token=${token}`;
-    if (navigator.clipboard) {
-        await navigator.clipboard.writeText(link);
-    } else {
-        const el = document.createElement('textarea');
-        el.value = link;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
+const copyText = async text => {
+    if (navigator.clipboard?.writeText) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return;
+        } catch (_) {
+            // Fall back to execCommand if Clipboard API is unavailable or denied.
+        }
     }
-    $toast.success(t('toastCopyLinkWithToken', [formatTimestamp(parseInt(token.substring(128, 144), 16))]));
+    const el = document.createElement('textarea');
+    el.value = text;
+    el.setAttribute('readonly', '');
+    el.style.position = 'fixed';
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    el.select();
+    el.setSelectionRange(0, text.length);
+    const copied = document.execCommand('copy');
+    document.body.removeChild(el);
+    if (!copied) {
+        throw new Error('Failed to copy share link.');
+    }
+};
+
+/**
+ * @param {PathItem} e
+ */
+const copyLinkWithToken = async e => {
+    if (!canShareWithToken.value) return;
+    let expiresAt = null;
+    try {
+        const token = await dufsfetch(`${e.fullpath}?${e.is_dir ? 'zip&' : ''}tokengen`).then(r => r.text());
+        const link = `${location.protocol}//${location.host}${e.fullpath}?${e.is_dir ? 'zip&' : ''}token=${token}`;
+        await copyText(link);
+        expiresAt = formatTimestamp(parseInt(token.substring(128, 144), 16));
+    } catch (err) {
+        if (err?.status === undefined) $toast.error(err.toString());
+    } finally {
+        if (expiresAt) $toast.success(t('toastShareLinkWithToken', [expiresAt]));
+    }
 };
 
 /**
@@ -1403,16 +1425,17 @@ const createFile = async () => {
     if (!path) return;
     const url = currentPath.value + encodeURIComponent(path);
     try {
-        const status = await fetch(url, { method: 'HEAD' }).then(r => r.status);
-        if (status === 200) {
+        const head = await fetch(url, { method: 'HEAD' });
+        if (head.status === 200) {
             return $toast.warning(t('toastCreateFileExists', [path]));
-        } else if (status !== 404) {
-            const e = new Error(r.statusText);
-            e.status = r.status;
+        } else if (head.status !== 404) {
+            const e = new Error(head.statusText || `HTTP ${head.status}`);
+            e.status = head.status;
             throw e;
         }
     } catch (e) {
         $toast.error(e.toString());
+        return;
     }
     await dufsfetch(url, { method: 'PUT' });
     $toast.success(t('toastCreateFile', [path]));
