@@ -1076,7 +1076,7 @@ const updateFilelist = async () => {
     if (route.path.match(/\/{2,}$/)) {
         return await router.replace(route.path.replace(/\/{2,}$/, '/'));
     }
-    document.title = (window.__DUFS_MATERIAL_CONFIG__?.document || 'Index of ${path} - dufs').replaceAll('${path}', decodeURIComponent(removeSuffix(currentPathWithoutPrefix.value, '/')) || '/');
+    document.title = (window.__DUFS_MATERIAL_CONFIG__?.document || 'dufs').replaceAll('${path}', decodeURIComponent(removeSuffix(currentPathWithoutPrefix.value, '/')) || '/');
     let items;
     if (window.__INITIAL_DATA__) {
         items = window.__INITIAL_DATA__;
