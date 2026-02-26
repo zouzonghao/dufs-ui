@@ -1,0 +1,220 @@
+# dufs-material-assets
+
+[![CI](https://github.com/TransparentLC/dufs-material-assets/actions/workflows/ci.yml/badge.svg)](https://github.com/TransparentLC/dufs-material-assets/actions/workflows/ci.yml)
+
+[dufs](https://github.com/sigoden/dufs) 的 Material Design 风格自定义前端界面。
+
+使用 Vue 3 + Vuetify 构建，部分设计参考 [Cloudreve](https://github.com/cloudreve/Cloudreve)，添加了一些额外的功能。
+
+如果你是为了部署本地文件共享或 WebDAV 服务（不包括挂载网盘），因为最近的“AList 被商业收购/投毒事件”而选择 dufs 作为替代品，那么你大概也会对这个项目感兴趣～
+
+|  |  |  |
+| - | - | - |
+| <picture><source media="(prefers-color-scheme:dark)" srcset="https://github.com/TransparentLC/dufs-material-assets/assets/47057319/f8488128-ad2b-4f3d-950e-10c2a11ac390"><img src="https://github.com/TransparentLC/dufs-material-assets/assets/47057319/094fa2be-afeb-4010-9bec-d014b888b97b"></picture> | <picture><source media="(prefers-color-scheme:dark)" srcset="https://p.sda1.dev/29/85cb90f522dbb8b4eabec7f3f74ec7dd/J8uL.avif"><img src="https://p.sda1.dev/29/8be21ca522b4e72a413803470ccafb11/h5K6.avif"></picture> | <picture><source media="(prefers-color-scheme:dark)" srcset="https://p.sda1.dev/29/2c54e52cef25e1267f3359451499fd8b/hRnv.avif"><img src="https://p.sda1.dev/29/a20f9d52828b74db2ac7baada95276ea/nJFN.avif"></picture> |
+
+* 按照[“自定义界面”](#自定义界面)的介绍进行配置即可实现图 2 的效果
+    * 背景图片来自 Pixabay [#1](https://pixabay.com/photos/mountains-lake-canada-banff-nature-9606525/) [#2](https://pixabay.com/photos/architecture-building-business-city-1868667/)
+* 实现图 3 的效果除了按照[“自定义界面”](#自定义界面)进行配置，还需要编辑这个项目的 HTML 文件，并引入额外编写的 JS 和 CSS 等资源
+    * 图中的主题设计取自“maimai でらっくす Splash”的[官方网站](https://web.archive.org/web/20201231182646/https://maimai.sega.jp/)
+    * 进行这种程度的修改需要基本的前端开发知识
+
+## 已实现/适配的功能
+
+标有✨的是原版前端界面未支持，在本项目中额外添加的功能。
+
+* 文件列表
+* URL 路径前缀
+* 显示符号链接
+* 打包下载
+* 登录后复制带有 Token 的下载链接✨
+    * dufs [v0.44.0](https://github.com/sigoden/dufs/pull/603) 添加的功能
+    * 此类链接可用于浏览器以外的下载器，无需在下载器中配置登录
+* 文件上传
+    * 支持拖拽
+* 新建文件夹
+* 移动/重命名/删除/编辑文件
+* 搜索
+* 深色模式
+* 响应式设计
+* 文本文件预览✨
+    * 代码高亮（使用 [prism](https://prismjs.com) 实现）
+    * 数学公式渲染（使用 https://i.upmath.me/ 的 API 实现）
+    * 支持渲染 Markdown 文件（使用 [Marked](https://marked.js.org/) 实现）
+* README 文件展示✨
+    * 自动在文件列表下方展示当前目录的 `README.md`、`README.txt` 或 `README` 文件
+* 图片查看器
+* 视频播放器
+    * 使用 `<video>` 标签实现，支持的封装和编码可以参见 [caniuse](https://caniuse.com/?search=video%20format)
+* 音乐播放器✨
+    * 使用 `<audio>` 标签实现，支持的封装和编码可以参见 [caniuse](https://caniuse.com/?search=audio%20format)
+    * 同一目录下音频文件顺序/随机/循环播放
+    * 解析并展示标题、艺术家、专辑名称、封面图等元数据（使用 [jsmediatags](https://www.npmjs.com/package/jsmediatags) 实现）
+* 字体查看器✨
+* 自定义页面标题和主题色✨
+* 自定义页脚✨
+* 分页展示文件✨
+    * 适用于目录内有上千个文件的情况
+    * 默认不启用，需要自定义分页大小
+* 多语言支持✨
+    * 已支持的语言或添加翻译请参见 [`src/i18n.js`](https://github.com/TransparentLC/dufs-material-assets/blob/master/src/i18n.js)
+
+## 使用方法
+
+从 [GitHub Actions](https://github.com/TransparentLC/dufs-material-assets/actions) 或 [nightly.link](https://nightly.link/TransparentLC/dufs-material-assets/workflows/ci/master) 下载前端资源后，假定保存在 `dufs-material-assets` 目录，在启动 dufs 时添加参数 `--assets dufs-material-assets`。
+
+也可以自己构建前端资源。
+
+如果不想单独保存这个项目的前端资源和在每次启动 dufs 时设定 `--assets` 参数，在 Actions 里面也有编译好的、嵌入了这个项目的前端资源（替换了原版的前端资源）的 dufs [二进制文件](https://github.com/TransparentLC/dufs-material-assets/actions/workflows/build-embed.yml)，不过以这种方式使用将无法自定义界面。
+
+[Releases](https://github.com/TransparentLC/dufs-material-assets/releases) 会在 dufs 发布新版本时更新，版本号和 dufs 一致，但不一定是这个项目的最新版本。
+
+如果你使用过 dufs 原版的前端资源，然后切换到这个项目的前端资源重新运行，打开网页时可能会出现“No data”的提示，这是因为你的浏览器仍然在使用缓存的原版前端资源的 `index.js`，清除缓存后刷新即可（例如使用 <kbd>Ctrl+F5</kbd>）。
+
+<details>
+
+<summary>对于开发的补充说明</summary>
+
+```shell
+pnpm run dev
+pnpm run dufs-api
+```
+
+为了方便适配各个功能，`dufs-api` 固定了一些启动 dufs 的参数，与代码中仅在开发模式下会运行的部分对应。
+
+</details>
+
+## 截图
+
+<details>
+
+<summary>搜索/响应式设计</summary>
+
+![](https://github.com/TransparentLC/dufs-material-assets/assets/47057319/bbf048b9-5be6-49fe-a9b1-22467575f5be)
+
+</details>
+
+<details>
+
+<summary>文本文件预览</summary>
+
+![](https://github.com/TransparentLC/dufs-material-assets/assets/47057319/5f094480-1e53-4d80-8a5a-56b2db95be23)
+
+</details>
+
+<details>
+
+<summary>图片查看器</summary>
+
+![](https://github.com/TransparentLC/dufs-material-assets/assets/47057319/17119400-d218-4a6d-85dd-3b9fa9e436e1)
+
+</details>
+
+<details>
+
+<summary>视频播放器</summary>
+
+![](https://github.com/TransparentLC/dufs-material-assets/assets/47057319/253dd093-de65-4ffc-8461-6139b23b47a7)
+
+</details>
+
+<details>
+
+<summary>音乐播放器</summary>
+
+![](https://github.com/TransparentLC/dufs-material-assets/assets/47057319/c7852e66-495c-4ec0-86e6-db8a6c316f20)
+
+</details>
+
+<details>
+
+<summary>字体查看器</summary>
+
+![](https://github.com/user-attachments/assets/cb1905f3-bb6d-40cd-ac27-7acbcfeffae9)
+
+</details>
+
+## 自定义界面
+
+按照以下指引在 `index.html` 的 `<script>` 部分添加 `window.__DUFS_MATERIAL_CONFIG__`：
+
+```js
+window.__DUFS_MATERIAL_CONFIG__ = {
+    // 网页标题
+    document: 'Index of ${path} - Custom title',
+    // 左上角显示的标题和 LOGO
+    page: {
+        title: 'Custom title',
+        logo: {
+            light: 'https://example.com/logo-light.png',
+            dark: 'https://example.com/logo-dark.png',
+        },
+        // 也可以在浅色和深色主题下使用同一个 LOGO
+        // logo: 'https://example.com/logo.png',
+    },
+    // 自定义页脚
+    // 可以使用 Markdown 格式
+    footer: 'Copyright © 2025 **John Doe** ![](https://img.shields.io/badge/any_text-you_like-blue)\\n\\n[京ICP备XXXXXXXX号-X](https://beian.miit.gov.cn/)',
+    // 背景图片
+    background: {
+        light: 'https://example.com/background-light.webp',
+        dark: 'https://example.com/background-dark.webp',
+    },
+    // 也可以在浅色和深色主题下使用同一张背景图片
+    // background: 'https://example.com/background.webp',
+    // 浅色和深色主题
+    // 参见 https://vuetifyjs.com/zh-Hans/features/theme/ 的 colors 部分
+    theme: {
+        light: {
+            primary: '#0288d1',
+            secondary: '#00b0ff',
+        },
+        dark: {
+            primary: '#026da7',
+            secondary: '#008dcc',
+        },
+    },
+    // 为卡片添加毛玻璃效果
+    // 可以设置模糊半径（单位 px）和不透明度（范围 0-1）
+    // 建议和背景图片配合使用
+    glassmorphism: {
+        // 顶部应用栏
+        appbar: { blur: 5, alpha: .6 },
+        // 文件列表
+        filelist: { blur: 5, alpha: .8 },
+        // README
+        readme: { blur: 5, alpha: .8 },
+        // 预览窗口
+        preview: { blur: 5, alpha: .8 },
+    },
+    // 分页大小
+    limit: 100,
+};
+
+// 由 dufs 填充的页面内容，不要修改
+window.__DUFS_PREFIX__ = "__ASSETS_PREFIX__";
+window.__INITIAL_DATA__ = JSON.parse(decodeURIComponent(escape(atob("__INDEX_DATA__"))));
+```
+
+如果 LOGO 和背景图片需要从本地加载，假设前端资源的目录结构如下：
+
+```plain
+dufs-material-assets
+│  index.html
+│  vite.svg
+│
+└─assets
+        index-xxxxxxxx.js
+        index-xxxxxxxx.css
+```
+
+你可以将图片（假定为 `image.webp`）放在 `assets` 目录下，然后地址填写为 `__ASSETS_PREFIX__assets/image.webp` 即可。dufs 会把 `index.html` 的 `__ASSETS_PREFIX__` 替换成 `/prefix/__dufs_v0.0.0__/` 这样的带有 `--path-prefix` 设定的前缀（如果有的话）和 dufs 版本号的路径，最后会指向 `--assets` 指定的目录里面的内容。
+
+`window.__DUFS_MATERIAL_CONFIG__` 的所有项目都是可选的，例如只想自定义 LOGO 的话，只写这一部分就可以了：
+
+```js
+window.__DUFS_MATERIAL_CONFIG__ = {
+    page: {
+        logo: '__ASSETS_PREFIX__assets/logo.svg',
+    },
+};
+```
