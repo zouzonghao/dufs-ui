@@ -21,7 +21,7 @@ jobs:
           cache-dependency-path: "**/package.json"
       - name: Build assets
         run: |
-          pnpm install --no-ignore-scripts
+          pnpm install
           DUFS_EMBED_FILENAME=1 pnpm run build
       - name: Upload assets
         uses: actions/upload-artifact@v4
